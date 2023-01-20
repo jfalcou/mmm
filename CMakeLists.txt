@@ -42,10 +42,11 @@ option( MMM_BUILD_DOCUMENTATION "Build docs for mmm" OFF )
 ##==================================================================================================
 ## Test targets
 ##==================================================================================================
-# if( MMM_BUILD_TEST )
-#   include(CTest)
-#   add_subdirectory(${PROJECT_SOURCE_DIR}/test/)
-# endif()
+if( MMM_BUILD_TEST )
+  include(CTest)
+  add_custom_target(unit)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/test/)
+endif()
 
 # if( MMM_BUILD_INTEGRATION )
 #   include(CTest)

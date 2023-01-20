@@ -6,6 +6,17 @@
 include(add_target_parent)
 
 ##==================================================================================================
+## Find MPI and otehr dependencies
+##==================================================================================================
+find_package(MPI REQUIRED QUIET)
+
+if (MPI_FOUND)
+  message( STATUS "[mmm] MPI found")
+else (MPI_FOUND)
+  message( FATAL_ERROR "[mmm] MPI not found - Check your installation")
+endif (MPI_FOUND)
+
+##==================================================================================================
 # Unit test Configuration
 ##==================================================================================================
 add_library(mmm_test INTERFACE)
@@ -17,6 +28,8 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 else()
   target_compile_options( mmm_test INTERFACE -std=c++20 -Werror -Wall -Wextra -Wconversion -Wunused-variable)
 endif()
+
+target_link_libraries(mmm_test INTERFACE MPI::MPI_CXX)
 
 target_include_directories( mmm_test INTERFACE
                             ${PROJECT_SOURCE_DIR}/test
@@ -39,7 +52,7 @@ set_property( TARGET ${test}
             )
 add_test( NAME ${test}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${location}"
-          COMMAND $<TARGET_FILE:${test}>
+          COMMAND "${MPIEXEC_EXECUTABLE}" ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} $<TARGET_FILE:${test}>
         )
 endfunction()
 
