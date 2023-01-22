@@ -7,11 +7,10 @@
 //==================================================================================================
 #pragma once
 
-#include "mmm/system/context.hpp"
 #define TTS_MAIN
 #define TTS_CUSTOM_DRIVER_FUNCTION mmm_entry_point
 #include "tts.hpp"
-#include <mmm/mmm.hpp>
+#include <mmm/system/context.hpp>
 
 int main(int argc, char const **argv)
 {
