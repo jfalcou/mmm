@@ -6,26 +6,28 @@
 */
 //==================================================================================================
 #pragma once
+
 #include <mpi.h>
 #include <string>
 
 namespace mmm
 {
   //================================================================================================
-  //! @struct context_handle
+  //! @struct context
   //! @brief RAII-enabled MPI setup object
   //!
-  //! mmm::context_handle encapsulates all the MPI setup and teardown process in a RAII enabled
+  //! mmm::context encapsulates all the MPI setup and teardown process in a RAII enabled
   //! type. It also provides access to persistent informations about the MPI environment like
   //! size, rank and node ID.
   //================================================================================================
-  struct context_handle
+  struct context
   {
     //! @brief Default constructor
     //! Initialize the MPI environment via `MPI_Init` and gather persistent informations
-    context_handle()
+    context()
     {
       MPI_Init(nullptr,nullptr);
+
       MPI_Comm_size(MPI_COMM_WORLD, &size);
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -37,12 +39,13 @@ namespace mmm
 
     //! @brief Destructor
     //! Teardown the MPI environment by calling `MPI_Finalize()`.
-    ~context_handle() { MPI_Finalize(); }
+    ~context() { MPI_Finalize(); }
 
-    // mmm::context_handle is non-copyable
-    context_handle(context_handle const&) =delete;
-    context_handle& operator=(context_handle const&) =delete;
+    // mmm::context is non-copyable
+    context(context const&) =delete;
+    context& operator=(context const&) =delete;
 
+    //! Synchronize current context
     void synchronize() const
     {
       MPI_Barrier(MPI_COMM_WORLD);
@@ -54,9 +57,21 @@ namespace mmm
     int         rank;
     //! Node ID for current process
     std::string node_id;
-  };
 
-  //! @var context
-  //! @brief Global MPI environment [handle](@ref mmm::context_handle)
-  inline context_handle const context = {};
+    static inline MPI_Datatype mpi_bool()
+    {
+      static auto type = context::build_mpi_bool();
+      return type;
+    }
+
+    private:
+    // Internal helpers
+    static inline MPI_Datatype build_mpi_bool()
+    {
+      MPI_Datatype type;
+      MPI_Type_contiguous(sizeof(bool), MPI_BYTE, &type);
+      MPI_Type_commit(&type);
+      return type;
+    }
+  };
 }

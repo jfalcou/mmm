@@ -27,6 +27,9 @@ TTS_CASE("Check datatype for integral types")
   TTS_EQUAL(mmm::datatype(mmm::type<unsigned short>     ) , MPI_UNSIGNED_SHORT    );
   TTS_EQUAL(mmm::datatype(mmm::type<unsigned int>       ) , MPI_UNSIGNED          );
   TTS_EQUAL(mmm::datatype(mmm::type<unsigned long long> ) , MPI_UNSIGNED_LONG_LONG);
+
+  // Slight trick here
+  TTS_EQUAL(mmm::datatype(mmm::type<bool> ), mmm::context::mpi_bool() );
 };
 
 TTS_CASE("Check datatype for specific pair types")

@@ -10,6 +10,8 @@
 
 int main()
 {
-  std::cout << "Hello world from processor " << mmm::context.node_id;
-  std::cout << " [" << mmm::context.rank << "/" << mmm::context.size << "]\n";
+  mmm::context mpi_context;
+
+  std::cout << "Hello world from processor " << mpi_context.node_id;
+  std::cout << " [" << mpi_context.rank << "/" << mpi_context.size << "]\n";
 }

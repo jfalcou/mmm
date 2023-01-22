@@ -14,9 +14,9 @@
 
 int main(int argc, char const **argv)
 {
-  using mmm::context;
+  mmm::context mpi_context;
 
-  context.synchronize();
+  mpi_context.synchronize();
   std::cout << "----------------------------------------------------------------\n";
   std::cout << "[MMM] - Assertions: ";
   #ifdef NDEBUG
@@ -25,12 +25,12 @@ int main(int argc, char const **argv)
   std::cout << "Enabled\n";
   #endif
 
-  context.synchronize();
-  std::cout << ">> Testing on " << context.node_id << " "
-            << "(" << context.rank << "/" << context.size << ")"
+  mpi_context.synchronize();
+  std::cout << ">> Testing on " << mpi_context.node_id << " "
+            << "(" << mpi_context.rank << "/" << mpi_context.size << ")"
             << "\n";
 
-  context.synchronize();
+  mpi_context.synchronize();
   mmm_entry_point(argc, argv);
   auto nb_error = tts::report(0,0);
   std::cout << "\n";

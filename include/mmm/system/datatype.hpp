@@ -9,6 +9,7 @@
 
 #include <mpi.h>
 #include <mmm/detail/overload.hpp>
+#include <mmm/system/context.hpp>
 #include <mmm/system/traits.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -91,6 +92,9 @@ namespace mmm::tags
     else if constexpr(std::same_as<T,unsigned short>    ) return MPI_UNSIGNED_SHORT;
     else if constexpr(std::same_as<T,unsigned int>      ) return MPI_UNSIGNED;
     else if constexpr(std::same_as<T,unsigned long>     ) return MPI_UNSIGNED_LONG;
+
+    // Dynamically specified type
+    else if constexpr(std::same_as<T,bool>              ) return context::mpi_bool();
 
     // MPI version specific
     #if defined(MPI_WCHAR)
