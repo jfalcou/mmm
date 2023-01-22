@@ -67,6 +67,17 @@ namespace mmm
 //==================================================================================================
 // datatype specializations
 //==================================================================================================
+namespace mmm::detail
+{
+  inline MPI_Datatype build_mpi_bool()
+  {
+    MPI_Datatype type;
+    MPI_Type_contiguous(sizeof(bool), MPI_BYTE, &type);
+    MPI_Type_commit(&type);
+    return type;
+  }
+}
+
 namespace mmm::tags
 {
   // floating-point cases
@@ -94,7 +105,11 @@ namespace mmm::tags
     else if constexpr(std::same_as<T,unsigned long>     ) return MPI_UNSIGNED_LONG;
 
     // Dynamically specified type
-    else if constexpr(std::same_as<T,bool>              ) return context::mpi_bool();
+    else if constexpr(std::same_as<T,bool>              )
+    {
+      static auto type = detail::build_mpi_bool();
+      return type;
+    }
 
     // MPI version specific
     #if defined(MPI_WCHAR)

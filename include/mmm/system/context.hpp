@@ -24,17 +24,17 @@ namespace mmm
   {
     //! @brief Default constructor
     //! Initialize the MPI environment via `MPI_Init` and gather persistent informations
+    context(int& argc, char**& argv)
+    {
+      MPI_Init(&argc, &argv);
+      prepare();
+    }
+
+    //! Initialize the MPI environment via `MPI_Init` and gather persistent informations
     context()
     {
       MPI_Init(nullptr,nullptr);
-
-      MPI_Comm_size(MPI_COMM_WORLD, &size);
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-      int length;
-      char buffer[MPI_MAX_PROCESSOR_NAME];
-      MPI_Get_processor_name(buffer, &length);
-      node_id = std::string(&buffer[0], static_cast<std::string::size_type>(length));
+      prepare();
     }
 
     //! @brief Destructor
@@ -42,14 +42,11 @@ namespace mmm
     ~context() { MPI_Finalize(); }
 
     // mmm::context is non-copyable
-    context(context const&) =delete;
-    context& operator=(context const&) =delete;
+    context(context const&)             =delete;
+    context& operator=(context const&)  =delete;
 
     //! Synchronize current context
-    void synchronize() const
-    {
-      MPI_Barrier(MPI_COMM_WORLD);
-    }
+    void synchronize() const { MPI_Barrier(MPI_COMM_WORLD); }
 
     //! Size of current MPI environment
     int         size;
@@ -58,20 +55,18 @@ namespace mmm
     //! Node ID for current process
     std::string node_id;
 
-    static inline MPI_Datatype mpi_bool()
-    {
-      static auto type = context::build_mpi_bool();
-      return type;
-    }
-
-    private:
     // Internal helpers
-    static inline MPI_Datatype build_mpi_bool()
+    private:
+
+    void prepare()
     {
-      MPI_Datatype type;
-      MPI_Type_contiguous(sizeof(bool), MPI_BYTE, &type);
-      MPI_Type_commit(&type);
-      return type;
+      MPI_Comm_size(MPI_COMM_WORLD, &size);
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+      int length;
+      char buffer[MPI_MAX_PROCESSOR_NAME];
+      MPI_Get_processor_name(buffer, &length);
+      node_id = std::string(&buffer[0], static_cast<std::string::size_type>(length));
     }
   };
 }

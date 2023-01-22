@@ -5,12 +5,12 @@
   SPDX-License-Identifier: BSL-1.0
 */
 //==================================================================================================
-#include <iostream>
 #include <mmm/mmm.hpp>
+#include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
-  mmm::context mpi_context;
+  mmm::context mpi_context(argc, argv);
 
   std::cout << "Hello world from processor " << mpi_context.node_id;
   std::cout << " [" << mpi_context.rank << "/" << mpi_context.size << "]\n";

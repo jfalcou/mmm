@@ -7,7 +7,6 @@
 //==================================================================================================
 #include "test.hpp"
 #include <mmm/mmm.hpp>
-#include <mpi.h>
 
 TTS_CASE("Check datatype for floating point types")
 {
@@ -29,7 +28,7 @@ TTS_CASE("Check datatype for integral types")
   TTS_EQUAL(mmm::datatype(mmm::type<unsigned long long> ) , MPI_UNSIGNED_LONG_LONG);
 
   // Slight trick here
-  TTS_EQUAL(mmm::datatype(mmm::type<bool> ), mmm::context::mpi_bool() );
+  TTS_EXPR_IS(mmm::datatype(mmm::type<bool> ), MPI_Datatype );
 };
 
 TTS_CASE("Check datatype for specific pair types")
