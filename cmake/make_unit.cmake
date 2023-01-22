@@ -36,6 +36,12 @@ target_include_directories( mmm_test INTERFACE
                             ${PROJECT_SOURCE_DIR}/include
                           )
 
+if(MMM_RUN_ON_CI)
+  set(MPI_CLI_OPTION "--allow-run-as-root")
+else()
+  set(MPI_CLI_OPTION "")
+endif()
+
 ##==================================================================================================
 ## Turn a filename to a dot-separated target name
 ##==================================================================================================
@@ -52,7 +58,7 @@ set_property( TARGET ${test}
             )
 add_test( NAME ${test}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${location}"
-          COMMAND "${MPIEXEC_EXECUTABLE}" ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} $<TARGET_FILE:${test}>
+          COMMAND "${MPIEXEC_EXECUTABLE}" ${MPI_CLI_OPTION} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}  $<TARGET_FILE:${test}>
         )
 endfunction()
 
