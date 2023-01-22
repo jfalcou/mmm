@@ -1,0 +1,32 @@
+name: MMM CI
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: environment-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  linux:
+    runs-on: [ubuntu-latest]
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+        - { compiler: g++-12 , opts: -O0          }
+        - { compiler: g++-12 , opts: -O3 -DNDEBUG }
+        - { compiler: clang++, opts: -O0          }
+        - { compiler: clang++, opts: -O3 -DNDEBUG }
+    steps:
+      - name: Fetch current branch
+        uses: actions/checkout@v3
+      - name: Compiling MMM using ${{ matrix.cfg.compiler }} with ${{ matrix.cfg.opts }}
+        uses: ./.github/actions/run_docker
+        with:
+          compiler:       '${{ matrix.cfg.compiler }}'
+          options:        '${{ matrix.cfg.opts }}'
+          linker_options: ''
+          cpu:            2
