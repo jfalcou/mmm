@@ -47,21 +47,15 @@ namespace mmm
   {
     //! @brief Default constructor
     //! Initialize the MPI environment =and gather informations
-    context()
-    {
-      init_thread(nullptr, nullptr, thread_support::single);
-      prepare();
-    }
+    context() : context(thread_support::single)
+    {}
 
     //! @brief Constructor from argc/argv
     //! Initialize the MPI environment and gather informations
     //! @param argc `argc` Number of command line argument
     //! @param argv `argv` array of command line argument's strings
-    context(int& argc, char**& argv)
-    {
-      init_thread(&argc, &argv, thread_support::single);
-      prepare();
-    }
+    context(int& argc, char**& argv) : context(argc,argv,thread_support::single)
+    {}
 
     //! @brief Constructor with thread support
     //! Initialize the MPI environment at a given thread support level and gather informations
