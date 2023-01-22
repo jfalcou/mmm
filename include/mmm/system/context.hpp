@@ -9,9 +9,32 @@
 
 #include <mpi.h>
 #include <string>
+#include <ostream>
 
 namespace mmm
 {
+  //! Class enumeration for MPI thread support options
+  enum thread_support
+  {
+    //! Only one thread will execute.
+    single     = MPI_THREAD_SINGLE,
+    //! Only main thread can use MPI-like operations
+    funneled   = MPI_THREAD_FUNNELED,
+    //! Only one thread at a time can use MPI-like operations
+    serialized = MPI_THREAD_SERIALIZED,
+    //! MPI-like operations can be called from any thread at any time
+    multiple   = MPI_THREAD_MULTIPLE
+  };
+
+  inline std::ostream& operator<<(std::ostream& os, thread_support t)
+  {
+    if      (t == single    ) return os << "Single";
+    else  if(t == funneled  ) return os << "Funneled";
+    else  if(t == serialized) return os << "Serialized";
+    else  if(t == multiple  ) return os << "Multiple";
+    else                      return os << "Unsupported";
+  }
+
   //================================================================================================
   //! @struct context
   //! @brief RAII-enabled MPI setup object
@@ -23,17 +46,40 @@ namespace mmm
   struct context
   {
     //! @brief Default constructor
-    //! Initialize the MPI environment via `MPI_Init` and gather persistent informations
-    context(int& argc, char**& argv)
+    //! Initialize the MPI environment =and gather informations
+    context()
     {
-      MPI_Init(&argc, &argv);
+      init_thread(nullptr, nullptr, thread_support::single);
       prepare();
     }
 
-    //! Initialize the MPI environment via `MPI_Init` and gather persistent informations
-    context()
+    //! @brief Constructor from argc/argv
+    //! Initialize the MPI environment and gather informations
+    //! @param argc `argc` Number of command line argument
+    //! @param argv `argv` array of command line argument's strings
+    context(int& argc, char**& argv)
     {
-      MPI_Init(nullptr,nullptr);
+      init_thread(&argc, &argv, thread_support::single);
+      prepare();
+    }
+
+    //! @brief Constructor with thread support
+    //! Initialize the MPI environment at a given thread support level and gather informations
+    //! @param ts   Expected [thread support level](@ref thread_support)
+    context(thread_support ts)
+    {
+      init_thread(nullptr, nullptr, ts);
+      prepare();
+    }
+
+    //! @brief Constructor from argc/argv with thread support
+    //! Initialize the MPI environment at a given thread support level and gather informations
+    //! @param argc `argc` Number of command line argument
+    //! @param argv `argv` array of command line argument's strings
+    //! @param ts   Expected [thread support level](@ref thread_support)
+    context(int& argc, char**& argv, thread_support ts)
+    {
+      init_thread(&argc, &argv, ts);
       prepare();
     }
 
@@ -55,8 +101,17 @@ namespace mmm
     //! Node ID for current process
     std::string node_id;
 
+    //! Provided thread support
+    thread_support thread_level;
+
     // Internal helpers
     private:
+    void init_thread(int* argc, char*** argv, thread_support ts)
+    {
+      int provided_level;
+      MPI_Init_thread(argc, argv, static_cast<int>(ts), &provided_level);
+      thread_level = static_cast<thread_support>(provided_level);
+    }
 
     void prepare()
     {
