@@ -67,17 +67,6 @@ namespace mmm
 //==================================================================================================
 // datatype specializations
 //==================================================================================================
-namespace mmm::detail
-{
-  inline MPI_Datatype build_mpi_bool()
-  {
-    MPI_Datatype type;
-    MPI_Type_contiguous(sizeof(bool), MPI_BYTE, &type);
-    MPI_Type_commit(&type);
-    return type;
-  }
-}
-
 namespace mmm::tags
 {
   // floating-point cases
@@ -93,44 +82,16 @@ namespace mmm::tags
   template<std::integral T>
   auto tag_dispatch(datatype_ const&, type_t<T> ) noexcept
   {
-    // Basic integral types
-    if      constexpr(std::same_as<T,std::byte>         ) return MPI_BYTE;
-    else if constexpr(std::same_as<T,char>              ) return MPI_CHAR;
-    else if constexpr(std::same_as<T,short>             ) return MPI_SHORT;
-    else if constexpr(std::same_as<T,int>               ) return MPI_INT;
-    else if constexpr(std::same_as<T,long>              ) return MPI_LONG;
-    else if constexpr(std::same_as<T,unsigned char>     ) return MPI_UNSIGNED_CHAR;
-    else if constexpr(std::same_as<T,unsigned short>    ) return MPI_UNSIGNED_SHORT;
-    else if constexpr(std::same_as<T,unsigned int>      ) return MPI_UNSIGNED;
-    else if constexpr(std::same_as<T,unsigned long>     ) return MPI_UNSIGNED_LONG;
-
-    // Dynamically specified type
-    else if constexpr(std::same_as<T,bool>              )
-    {
-      static auto type = detail::build_mpi_bool();
-      return type;
-    }
-
-    // MPI version specific
-    #if defined(MPI_WCHAR)
-    else if constexpr(std::same_as<T,wchar_t>           ) return MPI_WCHAR;
-    #endif
-
-    #if defined(MPI_SIGNED_CHAR)
-    else if constexpr(std::same_as<T,signed char>       ) return MPI_SIGNED_CHAR;
-    #endif
-
-    #if defined(MPI_LONG_LONG_INT)
-    else if constexpr(std::same_as<T,long long>         ) return MPI_LONG_LONG_INT;
-    #endif
-
-    #if defined(MPI_UNSIGNED_LONG_LONG)
-    else if constexpr(std::same_as<T,unsigned long long>) return MPI_UNSIGNED_LONG_LONG;
-    #endif
-
-    #if defined(MPI_WCHAR)
-    else if constexpr(std::same_as<T,unsigned long long>) return MPI_UNSIGNED_LONG_LONG;
-    #endif
+    // signed integers by size
+    if      constexpr(  std::is_signed_v<T> && sizeof(T) == 1 ) return MPI_INT8_T;
+    else if constexpr(  std::is_signed_v<T> && sizeof(T) == 2 ) return MPI_INT16_T;
+    else if constexpr(  std::is_signed_v<T> && sizeof(T) == 4 ) return MPI_INT32_T;
+    else if constexpr(  std::is_signed_v<T> && sizeof(T) == 8 ) return MPI_INT64_T;
+    // unsigned integers by size
+    else if constexpr( !std::is_signed_v<T> && sizeof(T) == 1 ) return MPI_UINT8_T;
+    else if constexpr( !std::is_signed_v<T> && sizeof(T) == 2 ) return MPI_UINT16_T;
+    else if constexpr( !std::is_signed_v<T> && sizeof(T) == 4 ) return MPI_UINT32_T;
+    else if constexpr( !std::is_signed_v<T> && sizeof(T) == 8 ) return MPI_UINT64_T;
   }
 
   // Specific pair types

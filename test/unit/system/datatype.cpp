@@ -17,18 +17,18 @@ TTS_CASE("Check datatype for floating point types")
 
 TTS_CASE("Check datatype for integral types")
 {
-  TTS_EQUAL(mmm::datatype(mmm::type<char>             ) , MPI_CHAR     );
-  TTS_EQUAL(mmm::datatype(mmm::type<signed short>     ) , MPI_SHORT    );
-  TTS_EQUAL(mmm::datatype(mmm::type<signed int>       ) , MPI_INT      );
-  TTS_EQUAL(mmm::datatype(mmm::type<signed long long> ) , MPI_LONG_LONG);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::int8_t> ), MPI_INT8_T);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::int16_t>), MPI_INT16_T);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::int32_t>), MPI_INT32_T);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::int64_t>), MPI_INT64_T);
 
-  TTS_EQUAL(mmm::datatype(mmm::type<unsigned char>      ) , MPI_UNSIGNED_CHAR     );
-  TTS_EQUAL(mmm::datatype(mmm::type<unsigned short>     ) , MPI_UNSIGNED_SHORT    );
-  TTS_EQUAL(mmm::datatype(mmm::type<unsigned int>       ) , MPI_UNSIGNED          );
-  TTS_EQUAL(mmm::datatype(mmm::type<unsigned long long> ) , MPI_UNSIGNED_LONG_LONG);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::uint8_t> ), MPI_UINT8_T);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::uint16_t>), MPI_UINT16_T);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::uint32_t>), MPI_UINT32_T);
+  TTS_EQUAL(mmm::datatype(mmm::type<std::uint64_t>), MPI_UINT64_T);
 
   // Slight trick here
-  TTS_EXPR_IS(mmm::datatype(mmm::type<bool> ), MPI_Datatype );
+  TTS_EQUAL(mmm::datatype(mmm::type<bool>), MPI_UINT8_T);
 };
 
 TTS_CASE("Check datatype for specific pair types")
