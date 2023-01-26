@@ -85,21 +85,25 @@ namespace mmm
     context(context const&)             =delete;
     context& operator=(context const&)  =delete;
 
-    //! Synchronize current context
-    void synchronize() const { MPI_Barrier(MPI_COMM_WORLD); }
-
     //! Size of current MPI environment
-    int         size;
+    int         size() const noexcept { return size_; }
+
     //! Rank of current process in the current MPI environment
-    int         rank;
+    int         rank() const noexcept { return rank_; }
+
     //! Node ID for current process
-    std::string node_id;
+    std::string node_id() const noexcept { return id_; }
 
     //! Provided thread support
     thread_support thread_level;
 
     // Internal helpers
     private:
+
+    int         size_;
+    int         rank_;
+    std::string id_;
+
     void init_thread(int* argc, char*** argv, thread_support ts)
     {
       int provided_level;
@@ -109,13 +113,13 @@ namespace mmm
 
     void prepare()
     {
-      MPI_Comm_size(MPI_COMM_WORLD, &size);
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      MPI_Comm_size(MPI_COMM_WORLD, &size_);
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
 
       int length;
       char buffer[MPI_MAX_PROCESSOR_NAME];
       MPI_Get_processor_name(buffer, &length);
-      node_id = std::string(&buffer[0], static_cast<std::string::size_type>(length));
+      id_ = std::string(&buffer[0], static_cast<std::string::size_type>(length));
     }
   };
 }
