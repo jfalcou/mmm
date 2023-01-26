@@ -7,7 +7,6 @@
 //==================================================================================================
 #pragma once
 
-#include <mpi.h>
 #include <mmm/detail/overload.hpp>
 #include <mmm/system/context.hpp>
 #include <mmm/system/traits.hpp>

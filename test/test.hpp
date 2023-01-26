@@ -12,11 +12,9 @@
 #include "tts.hpp"
 #include <mmm/system/context.hpp>
 
-int main(int argc, char const **argv)
+int main(int argc, const char** argv)
 {
-  mmm::context mpi_context;
-
-  //mpi_context.synchronize();
+  //mmm::context.synchronize();
   std::cout << "----------------------------------------------------------------\n";
   std::cout << "[MMM] - Assertions: ";
   #ifdef NDEBUG
@@ -25,12 +23,12 @@ int main(int argc, char const **argv)
   std::cout << "Enabled\n";
   #endif
 
- // mpi_context.synchronize();
-  std::cout << ">> Testing on " << mpi_context.node_id() << " "
-            << "(" << mpi_context.rank() << "/" << mpi_context.size() << ")"
+ // mmm::context.synchronize();
+  std::cout << ">> Testing on " << mmm::context.node_id() << " "
+            << "(" << mmm::context.rank() << "/" << mmm::context.size() << ")"
             << "\n";
 
- // mpi_context.synchronize();
+ // mmm::context.synchronize();
   mmm_entry_point(argc, argv);
   auto nb_error = tts::report(0,0);
   std::cout << "\n";

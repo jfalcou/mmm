@@ -11,6 +11,10 @@
 #include <string>
 #include <ostream>
 
+#if !defined(MMM_THREAD_SUPPORT)
+#define MMM_THREAD_SUPPORT ::mmm::thread_support::single
+#endif
+
 namespace mmm
 {
   //! Class enumeration for MPI thread support options
@@ -36,54 +40,30 @@ namespace mmm
   }
 
   //================================================================================================
-  //! @struct context
+  //! @struct mpi_context
   //! @brief RAII-enabled MPI setup object
   //!
-  //! mmm::context encapsulates all the MPI setup and teardown process in a RAII enabled
+  //! mmm::mpi_context encapsulates all the MPI setup and teardown process in a RAII enabled
   //! type. It also provides access to persistent informations about the MPI environment like
   //! size, rank and node ID.
   //================================================================================================
-  struct context
+  struct mpi_context
   {
     //! @brief Default constructor
-    //! Initialize the MPI environment =and gather informations
-    context() : context(thread_support::single)
-    {}
-
-    //! @brief Constructor from argc/argv
     //! Initialize the MPI environment and gather informations
-    //! @param argc `argc` Number of command line argument
-    //! @param argv `argv` array of command line argument's strings
-    context(int& argc, char**& argv) : context(argc,argv,thread_support::single)
-    {}
-
-    //! @brief Constructor with thread support
-    //! Initialize the MPI environment at a given thread support level and gather informations
-    //! @param ts   Expected [thread support level](@ref thread_support)
-    context(thread_support ts)
+    mpi_context()
     {
-      init_thread(nullptr, nullptr, ts);
-      prepare();
-    }
-
-    //! @brief Constructor from argc/argv with thread support
-    //! Initialize the MPI environment at a given thread support level and gather informations
-    //! @param argc `argc` Number of command line argument
-    //! @param argv `argv` array of command line argument's strings
-    //! @param ts   Expected [thread support level](@ref thread_support)
-    context(int& argc, char**& argv, thread_support ts)
-    {
-      init_thread(&argc, &argv, ts);
+      init_thread(nullptr, nullptr, MMM_THREAD_SUPPORT);
       prepare();
     }
 
     //! @brief Destructor
     //! Teardown the MPI environment by calling `MPI_Finalize()`.
-    ~context() { MPI_Finalize(); }
+    ~mpi_context() { MPI_Finalize(); }
 
-    // mmm::context is non-copyable
-    context(context const&)             =delete;
-    context& operator=(context const&)  =delete;
+    // mmm::mpi_context is non-copyable
+    mpi_context(mpi_context const&)             =delete;
+    mpi_context& operator=(mpi_context const&)  =delete;
 
     //! Size of current MPI environment
     int         size() const noexcept { return size_; }
@@ -95,20 +75,21 @@ namespace mmm
     std::string node_id() const noexcept { return id_; }
 
     //! Provided thread support
-    thread_support thread_level;
+    thread_support threading() const noexcept { return threading_; }
 
     // Internal helpers
     private:
 
-    int         size_;
-    int         rank_;
-    std::string id_;
+    std::string     id_;
+    thread_support  threading_;
+    int             size_;
+    int             rank_;
 
     void init_thread(int* argc, char*** argv, thread_support ts)
     {
       int provided_level;
       MPI_Init_thread(argc, argv, static_cast<int>(ts), &provided_level);
-      thread_level = static_cast<thread_support>(provided_level);
+      threading_ = static_cast<thread_support>(provided_level);
     }
 
     void prepare()
@@ -122,4 +103,7 @@ namespace mmm
       id_ = std::string(&buffer[0], static_cast<std::string::size_type>(length));
     }
   };
+
+
+  inline const mpi_context context = {};
 }
