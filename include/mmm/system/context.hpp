@@ -30,6 +30,7 @@ namespace mmm
     multiple   = MPI_THREAD_MULTIPLE
   };
 
+  //! Stream insertion ofr thread_support
   inline std::ostream& operator<<(std::ostream& os, thread_support t)
   {
     if      (t == single    ) return os << "Single";
@@ -37,6 +38,15 @@ namespace mmm
     else  if(t == serialized) return os << "Serialized";
     else  if(t == multiple  ) return os << "Multiple";
     else                      return os << "Unsupported";
+  }
+
+  //! Strong integer type representing a rank
+  enum class pid : int {};
+
+  //! Stream insertion ofr thread_support
+  inline std::ostream& operator<<(std::ostream& os, pid p)
+  {
+    return os << static_cast<int>(p);
   }
 
   //================================================================================================
@@ -69,7 +79,7 @@ namespace mmm
     int         size() const noexcept { return size_; }
 
     //! Rank of current process in the current MPI environment
-    int         rank() const noexcept { return rank_; }
+    pid         rank() const noexcept { return rank_; }
 
     //! Node ID for current process
     std::string node_id() const noexcept { return id_; }
@@ -83,7 +93,7 @@ namespace mmm
     std::string     id_;
     thread_support  threading_;
     int             size_;
-    int             rank_;
+    pid             rank_;
 
     void init_thread(int* argc, char*** argv, thread_support ts)
     {
@@ -95,7 +105,10 @@ namespace mmm
     void prepare()
     {
       MPI_Comm_size(MPI_COMM_WORLD, &size_);
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
+
+      int r;
+      MPI_Comm_rank(MPI_COMM_WORLD, &r);
+      rank_ = pid{r};
 
       int length;
       char buffer[MPI_MAX_PROCESSOR_NAME];

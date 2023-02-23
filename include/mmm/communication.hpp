@@ -7,9 +7,4 @@
 //==================================================================================================
 #pragma once
 
-/// @brief Main **MMM** namespace
-namespace mmm {}
-
-#include <mmm/system.hpp>
-#include <mmm/entity.hpp>
-#include <mmm/communication.hpp>
+#include <mmm/communication/scatter.hpp>
