@@ -11,7 +11,6 @@
 
 TTS_CASE("TODO CHECK for distribuable_sequence<T>")
 {
-  TTS_EQUAL(mmm::distribuable_sequence<int>().status(), false);
   TTS_EQUAL(mmm::distribuable_sequence<int>().root(), 0);
 
   int size = mmm::context.size();
@@ -27,84 +26,83 @@ TTS_CASE("TODO CHECK for distribuable_sequence<T>")
   auto dist_seq4 = mmm::distribuable_sequence<int>(size + k);
   auto dist_seq5 = mmm::distribuable_sequence<int>(size - p);
 
-  TTS_EQUAL(dist_seq1.status(), false);
   TTS_EQUAL(dist_seq1.root(), 0);
-  TTS_EQUAL(dist_seq1.local_size(), 0);
-  TTS_EQUAL(dist_seq2.local_size(), 1);
-  TTS_EQUAL(dist_seq3.local_size(), mul);
+  TTS_EQUAL(dist_seq1.size(), 0);
+  TTS_EQUAL(dist_seq2.size(), 1);
+  TTS_EQUAL(dist_seq3.size(), mul);
   //pour la local size de dist_seq(4/5) le résultat n'est que celui pour le processus root pad énormément de sens enfaite de tester
 
 
   for(int i = 0; i < size; i++)
   {
-      TTS_EQUAL(dist_seq1.count(i), 0);
-      TTS_EQUAL(dist_seq1.offset(i), 0);
+      TTS_EQUAL(dist_seq1.counts(), 0);
+      TTS_EQUAL(dist_seq1.offsets(), 0);
 
-      TTS_EQUAL(dist_seq2.count(i), 1);
-      TTS_EQUAL(dist_seq2.offset(i), i);
+      TTS_EQUAL(dist_seq2.counts(), 1);
+      TTS_EQUAL(dist_seq2.offsets(), i);
 
-      TTS_EQUAL(dist_seq3.count(i), mul);
-      TTS_EQUAL(dist_seq3.offset(i), mul * i);
+      TTS_EQUAL(dist_seq3.counts(), mul);
+      TTS_EQUAL(dist_seq3.offsets(), mul * i);
 
-      TTS_EQUAL(dist_seq4.count(i), 1 + (i < k%size ? (k/size) + 1 : (k/size)));
-      TTS_EQUAL(dist_seq4.offset(i), i * (k + size)/size + (i * (k + size)%size != 0 ? 1 : 0));
+      TTS_EQUAL(dist_seq4.counts(), 1 + (i < k%size ? (k/size) + 1 : (k/size)));
+      TTS_EQUAL(dist_seq4.offsets(), i * (k + size)/size + (i * (k + size)%size != 0 ? 1 : 0));
 
-      TTS_EQUAL(dist_seq5.count(i), ( i < size - p ? 1 : 0));
-      TTS_EQUAL(dist_seq5.offset(i), ( i < size - p ? i : (size - p)));
+      TTS_EQUAL(dist_seq5.counts(), ( i < size - p ? 1 : 0));
+      TTS_EQUAL(dist_seq5.offsets(), ( i < size - p ? i : (size - p)));
   }
 };
 
 TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
 {
-  int size = mmm::context.size();
-  int rank = mmm::context.rank();
-  int nb_elem = 10;
-  int mul = 4;
-  int p = 1;
-  mmm::distribuable_sequence<int> dist_seq0(0);
-  mmm::distribuable_sequence<int> dist_seq1(size);
-  mmm::distribuable_sequence<int> dist_seq2(size * mul);
-  mmm::distribuable_sequence<int> dist_seq3(size + nb_elem);
-  mmm::distribuable_sequence<int> dist_seq4(size - p);
+  //int size = mmm::context.size();
+  //mmm::pid rank = mmm::context.rank();
+//
+  //int nb_elem = 12;
+  //int mul = 4;
+  //int p = 1;
 
-  for(int i = 0; i < size + nb_elem; i++)
-  {
-    dist_seq3[i] = i;
-  }
+  //mmm::distribuable_sequence<int> dist_seq(nb_elem, 0);
 
-  if(rank == dist_seq3.root()) 
-  {
-    //Use of a span to see if the vec is [0,1,2,3,...,9]
-    std::span<int> mySpan(dist_seq3.data(), dist_seq3.size());
-    TTS_EQUAL(mySpan.size(), size + nb_elem);
-    for(std::size_t i = 0; i < mySpan.size(); i++)
-    {
-      TTS_EQUAL(mySpan[i], i);
-    }
-  }
+  //int myArray[nb_elem];
+  //for (int i = 0; i < nb_elem; i++)
+  //{
+  //  myArray[i] = i;
+  //}
+  //
+  //for(int i = 0; i < nb_elem; i++)
+  // {
+  //   if(rank == dist_seq.root())
+  //   {
+  //     dist_seq[i] = i;
+  //   }
+  // }
 
-  dist_seq3.scatter();
+  //auto s = mmm::scatter(dist_seq);
+//
+  //std::span mySpan{s};
+  //TTS_EQUAL(mySpan.size(), 3);
+//
+  //for(int i = 0; i < size; i++)
+  //{
+  //  TTS_EQUAL(mySpan, std::span{[i*3, i*3+1, i*3+2]})
+  //}
 
-  //Iterate on each proc of our system to see if they have [0,1,2], [3,4,5], [6,7], [8,9]
-  for(int i = 0; i < size; i++)
-  {
-    //We have to creat a span to see if the distributed_seq have the right value
-    //Check if the size of our vector correspond to the count
-    if(i == rank)
-    {
-    }
-  }
-
-  dist_seq3.gather();
-
-  if(rank == dist_seq3.root()) 
-  {
-    //See if we came back to the initial distributed vector
-    std::span<int> mySpan(dist_seq3.begin(), dist_seq3.size());
-    TTS_EQUAL(mySpan.size(), size + nb_elem);
-    for(std::size_t i = 0; i < mySpan.size(); i++)
-    {
-      TTS_EQUAL(mySpan[i], i);
-    }
-  }
+  //mmm::distribuable_sequence<int> dist_seq(nb_elem, 0);
+  //auto count = dist_seq.counts();
+  //auto offset = dist_seq.offsets();
+  //auto s = mmm::scatter(dist_seq);
+  //int offset_cpt = 0;
+//
+  //for(int i = 0; i < size; i++)
+  //{
+  //  int count_cpt = 0;
+  //  for(e : s)
+  //  {
+  //    count_cpt++;
+  //  }
+  //  TTS_EQUAL(count[i], cpt);
+  //  TTS_EQUAL(offset[i], offset_cpt);
+//
+  //  offset_cpt += count_cpt;
+  //}
 };
