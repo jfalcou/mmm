@@ -117,38 +117,48 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
     }
   }
 
-  mmm::distribuable_sequence<int> dist_seq2(std::begin(myArray2), std::end(myArray2));
+TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
+{
+  int size = mmm::context.size();
+  int rank = mmm::context.rank();
+  int nb_elem = 10;
+  int mul = 4;
+  int p = 1;
+  mmm::distribuable_sequence<int> dist_seq0(0);
+  mmm::distribuable_sequence<int> dist_seq1(size);
+  mmm::distribuable_sequence<int> dist_seq2(size * mul);
+  mmm::distribuable_sequence<int> dist_seq3(size + nb_elem);
+  mmm::distribuable_sequence<int> dist_seq4(size - p);
 
-  TTS_EQUAL(dist_seq2.counts()[r], dist_seq2.local_size(rank));
-
-  auto vec2 = mmm::scatter(dist_seq2);
-  std::span mySpan2{vec2};
-
-  //TTS_EQUAL(mySpan.size(), 4ULL);
-
-  for(int i = 0; i < size; i++)
+  for(int i = 0; i < size + nb_elem; i++)
   {
-    for(int j = 0; j < dist_seq1.counts()[r]; j++)
+    dist_seq3[i] = i;
+  }
+
+  if(rank == dist_seq3.root()) 
+  {
+    //Use of a span to see if the vec is [0,1,2,3,...,9]
+    std::span<int> mySpan(dist_seq3.data(), dist_seq3.size());
+    TTS_EQUAL(mySpan.size(), size + nb_elem);
+    for(std::size_t i = 0; i < mySpan.size(); i++)
     {
-      TTS_EQUAL(mySpan1[j], dist_seq1.offsets()[r] + j);
+      TTS_EQUAL(mySpan[i], i);
     }
   }
 
-//  mmm::distribuable_sequence<int> dist_seq(std::begin(myArray2), std::end(myArray2));
-//
-//  TTS_EQUAL(dist_seq.counts()[r], 3);
-//
-//  auto vec = mmm::scatter(dist_seq);
-//  std::span mySpan{vec};std::span mySpan2{vec2}
-//
-//  TTS_EQUAL(mySpan.size(), 3ULL);
-//
+  dist_seq3.scatter();
 
-  // mmm::distribuable_sequence<int> dist_seq(nb_elem, 0);
-  // auto count = dist_seq.counts();
-  // auto offset = dist_seq.offsets();
-  // auto s = mmm::scatter(dist_seq);
-  // int offset_cpt = 0;
+  //Iterate on each proc of our system to see if they have [0,1,2], [3,4,5], [6,7], [8,9]
+  for(int i = 0; i < size; i++)
+  {
+    //We have to creat a span to see if the distributed_seq have the right value
+    //Check if the size of our vector correspond to the count
+    if(i == rank)
+    {
+    }
+  }
+
+  dist_seq3.gather();
 
   // for(int i = 0; i < size; i++)
   // {

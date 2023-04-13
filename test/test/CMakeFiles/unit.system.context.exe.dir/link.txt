@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic -Wl,-rpath -Wl,/usr/lib -Wl,--enable-new-dtags CMakeFiles/unit.system.context.exe.dir/unit/system/context.cpp.o -o ../unit/unit.system.context.exe  -lmpi_cxx -lmpi 
