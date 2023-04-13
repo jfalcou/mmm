@@ -116,7 +116,7 @@ namespace mmm
     : parent(first,root == context.rank() ? last : first,alloc)
     , count_{context.size()}, offset_{context.size()}, root_(root)
     {
-      map_to_rank(last-first);
+      map_to_rank(static_cast<int>(last-first));
     }
 
     //! @brief Constructs the distribuable_sequence with the contents of the range [first, last).
@@ -234,11 +234,11 @@ namespace mmm
     std::vector<int>  offset_;
     pid               root_;
 
-    void map_to_rank(size_type n)
+    void map_to_rank(int n)
     {
-      auto sz         = context.size();
-      int chunk_size  = n / sz;
-      int remainder   = n % sz;
+      int sz         = context.size();
+      auto chunk_size  = n / sz;
+      auto remainder   = n % sz;
 
       for(int i = 0; i < sz; i++)
       {
