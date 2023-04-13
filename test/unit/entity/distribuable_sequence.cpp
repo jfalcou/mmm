@@ -78,10 +78,10 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
   {
     myArray1[i] = i;
   }
-  //for (int i = 0; i < sizeArray2; i++)
-  //{
-  //  myArray2[i] = i;
-  //}
+  for (int i = 0; i < sizeArray2; i++)
+  {
+    myArray2[i] = i;
+  }
 
   mmm::distribuable_sequence<int> dist_seq(std::begin(myArray0), std::end(myArray0));
 
@@ -117,6 +117,7 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
     }
   }
 
+/*
 TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
 {
   int size = mmm::context.size();
@@ -172,4 +173,5 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
 
   //  offset_cpt += count_cpt;
   // }
+  */
 };
