@@ -234,6 +234,12 @@ namespace mmm
     std::vector<int>  offset_;
     pid               root_;
 
+    public:
+    int get_offset(pid rk)
+    {
+      return offset_[static_cast<int>(rk)];
+    }
+
     void map_to_rank(int n)
     {
       int sz         = context.size();

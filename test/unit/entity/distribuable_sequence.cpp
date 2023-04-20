@@ -64,10 +64,14 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
   const int sizeArray1 = 16;
   // number of proc minus 1
   const int sizeArray2 = 3;
+  // a number that can not be divid by the number of proc
+  const int sizeArray3 = 21;
 
   int myArray0[sizeArray0];
   int myArray1[sizeArray1];
   int myArray2[sizeArray2];
+  int myArray3[sizeArray3];
+
 
   for (int i = 0; i < sizeArray0; i++)
   {
@@ -78,9 +82,15 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
   {
     myArray1[i] = i;
   }
+
   for (int i = 0; i < sizeArray2; i++)
   {
     myArray2[i] = i;
+  }
+
+  for (int i = 0; i < sizeArray3; i++)
+  {
+    myArray3[i] = i;
   }
 
   mmm::distribuable_sequence<int> dist_seq(std::begin(myArray0), std::end(myArray0));
@@ -117,61 +127,33 @@ TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
     }
   }
 
-/*
-TTS_CASE("SCATTER TEST for distribuable_sequence<T>")
-{
-  int size = mmm::context.size();
-  int rank = mmm::context.rank();
-  int nb_elem = 10;
-  int mul = 4;
-  int p = 1;
-  mmm::distribuable_sequence<int> dist_seq0(0);
-  mmm::distribuable_sequence<int> dist_seq1(size);
-  mmm::distribuable_sequence<int> dist_seq2(size * mul);
-  mmm::distribuable_sequence<int> dist_seq3(size + nb_elem);
-  mmm::distribuable_sequence<int> dist_seq4(size - p);
+  mmm::distribuable_sequence<int> dist_seq2(std::begin(myArray2), std::end(myArray2));
 
-  for(int i = 0; i < size + nb_elem; i++)
-  {
-    dist_seq3[i] = i;
-  }
+  TTS_EQUAL(dist_seq2.counts()[r], dist_seq2.local_size(rank));
 
-  if(rank == dist_seq3.root()) 
-  {
-    //Use of a span to see if the vec is [0,1,2,3,...,9]
-    std::span<int> mySpan(dist_seq3.data(), dist_seq3.size());
-    TTS_EQUAL(mySpan.size(), size + nb_elem);
-    for(std::size_t i = 0; i < mySpan.size(); i++)
-    {
-      TTS_EQUAL(mySpan[i], i);
-    }
-  }
+  auto vec2 = mmm::scatter(dist_seq2);
+  std::span mySpan2{vec2};
 
-  dist_seq3.scatter();
-
-  //Iterate on each proc of our system to see if they have [0,1,2], [3,4,5], [6,7], [8,9]
   for(int i = 0; i < size; i++)
   {
-    //We have to creat a span to see if the distributed_seq have the right value
-    //Check if the size of our vector correspond to the count
-    if(i == rank)
+    for(int j = 0; j < dist_seq2.counts()[r]; j++)
     {
+      TTS_EQUAL(mySpan2[j], dist_seq2.offsets()[r] + j);
     }
   }
 
-  dist_seq3.gather();
+  mmm::distribuable_sequence<int> dist_seq3(std::begin(myArray3), std::end(myArray3));
 
-  // for(int i = 0; i < size; i++)
-  // {
-  //  int count_cpt = 0;
-  //  for(e : s)
-  //  {
-  //    count_cpt++;
-  //  }
-  //  TTS_EQUAL(count[i], cpt);
-  //  TTS_EQUAL(offset[i], offset_cpt);
+  TTS_EQUAL(dist_seq3.counts()[r], dist_seq3.local_size(rank));
 
-  //  offset_cpt += count_cpt;
-  // }
-  */
+  auto vec3 = mmm::scatter(dist_seq3);
+  std::span mySpan3{vec3};
+
+  for(int i = 0; i < size; i++)
+  {
+    for(int j = 0; j < dist_seq3.counts()[r]; j++)
+    {
+      TTS_EQUAL(mySpan3[j], dist_seq3.offsets()[r] + j);
+    }
+  }
 };

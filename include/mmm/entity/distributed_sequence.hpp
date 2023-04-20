@@ -123,6 +123,17 @@ namespace mmm
     //! Returns if the sequence si empty
     auto empty() const{ return parent::empty(); }
 
+    // variable
+    private :
+    int offset_;
+
+
+    // Setter 
+    public :
+    void set_offset(int position)
+    {
+      this->offset_ = position;
+    }
     //==============================================================================================
     //! @}
     //==============================================================================================

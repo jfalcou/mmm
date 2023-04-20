@@ -13,9 +13,9 @@
 
 namespace mmm::tags
 {
-  struct scatter_ : callable<scatter_>
+  struct gather_ : callable<gather_>
   {
-    using callable<scatter_>::operator();
+    using callable<gather_>::operator();
 
     template<typename Seq>
     auto operator()(Seq const& s) const noexcept -> decltype(tag_dispatch(*this, s))
@@ -28,13 +28,13 @@ namespace mmm::tags
 namespace mmm
 {
   //================================================================================================
-  //! @var scatter
-  //! @brief Object function for scatter communications
+  //! @var gather
+  //! @brief Object function for gather communications
   //!
   //! **Defined in Header**
   //!
   //! @code
-  //! #include <mmm/communication/scatter.hpp>
+  //! #include <mmm/communication/gather.hpp>
   //! @endcode
   //!
   //! @groupheader{Callable Signatures}
@@ -56,7 +56,7 @@ namespace mmm
   //! A distributed sequence containing the scattered data across PID
   //!
   //================================================================================================
-  inline constexpr tags::scatter_ scatter = {};
+  inline constexpr tags::gather_ gather = {};
 }
 
 //==================================================================================================
@@ -65,21 +65,19 @@ namespace mmm
 namespace mmm::tags
 {
   template<typename T, typename A>
-  auto tag_dispatch(scatter_ const&, distribuable_sequence<T,A> const& seq) noexcept
+  auto tag_dispatch(gather_ const&, distributed_sequence<T,A> const& seq) noexcept
   {
     auto dt     = datatype(type<T>);
-    auto sz     = seq.local_size(context.rank());
+    auto sz     = seq.size(context.rank());
 
-    distributed_sequence<T,A> that(sz);
+    distribuable_sequence<T,A> dist(sz);
 
-    MPI_Scatterv( seq.data(), seq.counts().data(), seq.offsets().data(), dt
-                , that.data(), sz, dt
+    MPI_Gatherv( seq.data(), seq.size(), dt
+                , dist.data(), seq.offset_, dt
                 , static_cast<int>(seq.root())
                 , MPI_COMM_WORLD
                 );
-    
-    that.set_offset(seq.get_offset(context.rank()));
 
-    return that;
+    return dist;
   }
 }
