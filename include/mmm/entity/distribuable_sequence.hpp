@@ -72,7 +72,7 @@ namespace mmm
     //! @param count 	The size of the container
     //! @param alloc  Allocator to use for all memory allocations of this sequence
     //! @param root   PID of the process owning the memory. By default, p = 0
-    explicit distribuable_sequence(size_type count, A const& alloc, pid root = {})
+    explicit distribuable_sequence(std::integral auto count, A const& alloc, pid root = {})
     : parent(root == context.rank() ? count : 0,alloc)
     , count_{context.size()}, offset_{context.size()}, root_(root)
     {
@@ -82,7 +82,7 @@ namespace mmm
     //! @brief Constructs the container with  default-inserted instances of T.
     //! @param count 	The size of the container
     //! @param root   PID of the process owning the memory. By default, p = 0
-    explicit  distribuable_sequence(size_type count, pid root = {} )
+    explicit  distribuable_sequence(std::integral auto count, pid root = {} )
             : distribuable_sequence(count,A{},root)
     {}
 
@@ -91,7 +91,7 @@ namespace mmm
     //! @param value	The value to initialize elements of the container with
     //! @param alloc  Allocator to use for all memory allocations of this sequence
     //! @param root   PID of the process owning the memory. By default, p = 0
-    explicit distribuable_sequence(size_type count, const T& value, A const& alloc, pid root = {})
+    explicit distribuable_sequence(std::integral auto count, const T& value, A const& alloc, pid root = {})
     : parent(root == context.rank() ? count : 0,value,alloc)
     , count_{context.size()}, offset_{context.size()}, root_(root)
     {
@@ -102,7 +102,7 @@ namespace mmm
     //! @param count 	The size of the container
     //! @param value	The value to initialize elements of the container with
     //! @param root   PID of the process owning the memory. By default, p = 0
-    explicit  distribuable_sequence(size_type count, const T& value, pid root = {})
+    explicit  distribuable_sequence(std::integral auto count, const T& value, pid root = {})
             : distribuable_sequence(count,value,A{},root)
     {}
 
@@ -240,19 +240,19 @@ namespace mmm
       return offset_[static_cast<int>(rk)];
     }
 
-    void map_to_rank(int n)
+    void map_to_rank(std::size_t n)
     {
-      int sz         = context.size();
+      auto sz          = static_cast<std::size_t>(context.size());
       auto chunk_size  = n / sz;
       auto remainder   = n % sz;
 
-      for(int i = 0; i < sz; i++)
+      for(std::size_t i = 0; i < sz; i++)
       {
         count_[i] = chunk_size + ( i < remainder ? 1 : 0);
       }
 
       offset_[0] = 0;
-      for(int i = 1; i < sz; i++)
+      for(std::size_t i = 1; i < sz; i++)
       {
         offset_[i] = offset_[i - 1] + count_[i - 1];
       }

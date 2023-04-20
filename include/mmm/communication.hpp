@@ -8,3 +8,4 @@
 #pragma once
 
 #include <mmm/communication/scatter.hpp>
+#include <mmm/communication/gather.hpp>

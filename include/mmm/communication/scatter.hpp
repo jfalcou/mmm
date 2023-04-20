@@ -77,8 +77,6 @@ namespace mmm::tags
                 , static_cast<int>(seq.root())
                 , MPI_COMM_WORLD
                 );
-    
-    that.set_offset(seq.get_offset(context.rank()));
 
     return that;
   }

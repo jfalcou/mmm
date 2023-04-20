@@ -67,14 +67,17 @@ namespace mmm::tags
   template<typename T, typename A>
   auto tag_dispatch(gather_ const&, distributed_sequence<T,A> const& seq) noexcept
   {
-    auto dt     = datatype(type<T>);
-    auto sz     = seq.size(context.rank());
+    auto        dt          = datatype(type<T>);
+    auto local_size  = static_cast<int>(seq.size());
+    int   size       = 0;
 
-    distribuable_sequence<T,A> dist(sz);
+    MPI_Reduce(&local_size,&size,1,datatype(size),MPI_SUM,0,MPI_COMM_WORLD);
 
-    MPI_Gatherv( seq.data(), seq.size(), dt
-                , dist.data(), seq.offset_, dt
-                , static_cast<int>(seq.root())
+    distribuable_sequence<T,A> dist(size);
+
+    MPI_Gatherv(  seq.data() , local_size, dt
+                , dist.data(), dist.counts().data(), dist.offsets().data(), dt
+                , static_cast<int>(dist.root())
                 , MPI_COMM_WORLD
                 );
 

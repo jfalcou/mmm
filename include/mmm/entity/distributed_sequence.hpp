@@ -46,13 +46,13 @@ namespace mmm
     //! @brief Constructs the container with  default-inserted instances of T.
     //! @param count 	The size of the container
     //! @param alloc  Allocator to use for all memory allocations of this sequence
-    explicit  distributed_sequence(size_type count, A const& alloc)
+    explicit  distributed_sequence(std::integral auto count, A const& alloc)
             : parent(count,alloc)
     {}
 
     //! @brief Constructs the container with  default-inserted instances of T.
     //! @param count 	The size of the container
-    explicit  distributed_sequence(size_type count)
+    explicit  distributed_sequence(std::integral auto count)
             : distributed_sequence(count,A{})
     {}
 
@@ -121,33 +121,10 @@ namespace mmm
     auto size() const{ return parent::size(); }
 
     //! Returns if the sequence si empty
-    auto empty() const{ return parent::empty(); }
+    bool empty() const{ return parent::empty(); }
 
-    // variable
-    private :
-    int offset_;
-
-
-    // Setter 
-    public :
-    void set_offset(int position)
-    {
-      this->offset_ = position;
-    }
     //==============================================================================================
     //! @}
     //==============================================================================================
-
-    // void gather()
-    // {
-    //   auto dt = datatype(type<T>);
-
-    //   MPI_Gather( data(), local_size(), dt
-    //             , data(), local_size(), offset_, dt
-    //             , root(), MPI_COMM_WORLD
-    //             );
-
-    //   status_ = false;
-    // }
   };
 }

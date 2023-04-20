@@ -25,6 +25,12 @@ namespace mmm::tags
     {
       return tag_dispatch(*this, x);
     }
+
+    template<typename T>
+    auto operator()(T const&) const noexcept -> decltype(tag_dispatch(*this, type_t<T>{}))
+    {
+      return tag_dispatch(*this, type_t<T>{});
+    }
   };
 }
 
